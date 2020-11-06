@@ -1,0 +1,2 @@
+# configservice
+go config service
