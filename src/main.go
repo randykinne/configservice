@@ -31,7 +31,7 @@ func main() {
 	log.Info("HTTP Server Ready")
 	
 	r.HandleFunc("/", api.HomeHandler)
-	r.HandleFunc("/api", api.HomeHandler)
+	r.HandleFunc("/api", api.APIHandler)
 	r.Handle("/metrics", promhttp.Handler())
 
 	log.Fatal(http.ListenAndServe(":8080", r))

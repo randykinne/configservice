@@ -10,7 +10,7 @@ func HomeHandler(w http.ResponseWriter, r *http.Request) {
     w.Write([]byte(`{"message": "hello world"}`))
 }
 
-func route(w http.ResponseWriter, r *http.Request) {
+func APIHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
     switch r.Method {
     case "GET":    
@@ -20,7 +20,7 @@ func route(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusCreated)
         w.Write([]byte(`{"message": "created"}`))
     case "PUT":
-        w.WriteHeader(http.StatusAccepted)
+        w.WriteHeader(http.StatusBadRequest)
         w.Write([]byte(`{"message": "accepted"}`))
     case "DELETE":
         w.WriteHeader(http.StatusOK)
