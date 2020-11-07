@@ -14,12 +14,12 @@ import (
 	"github.com/slok/go-http-metrics/middleware/std"
 )
 
+// Our main function
 func main() {
 
 	mdlw := middleware.New(middleware.Config{
 		Recorder: metrics.NewRecorder(metrics.Config{}),
 	})
-
 
 	var log = logrus.New()
 
@@ -29,9 +29,14 @@ func main() {
 	r.Use(std.HandlerProvider("", mdlw))
 
 	log.Info("HTTP Server Ready")
-	
+
 	r.HandleFunc("/", api.HomeHandler)
 	r.HandleFunc("/api", api.APIHandler)
+	configHandler := r.PathPrefix("/api/configurations").Subrouter()
+	configHandler.HandleFunc("/", api.ConfigHandler)
+	configHandler.HandleFunc("/{id:[0-9]+}", api.SpecificConfigHandler)
+	r.PathPrefix("/").HandleFunc(api.CatchAllHandler)
+
 	r.Handle("/metrics", promhttp.Handler())
 
 	log.Fatal(http.ListenAndServe(":8080", r))
