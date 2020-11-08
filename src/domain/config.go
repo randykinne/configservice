@@ -1,9 +1,10 @@
 package domain
 
+// Config structure
 type Config struct {
-	Id     int
-    Name string
-	config map[string]interface{}
+	ID   string   `json:"id"`
+	Name string   `json:"name"`
+	Data []string `json:"data"`
 }
 
 // Get a config
