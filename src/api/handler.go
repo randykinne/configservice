@@ -12,7 +12,8 @@ import (
 
 // Response data
 type Response struct {
-	Message string `json:"message"`
+	StatusCode int
+	Data       map[string]interface{}
 }
 
 // CatchAllHandler for all requests if they don't match an endpoint
@@ -40,13 +41,18 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 
 		data.Put(c)
 
-		response := Response{"created"}
-		js, err := json.Marshal(response)
+		responseJSON := make(map[string]interface{})
+		responseJSON["message"] = "created"
+		responseJSON["location"] = "lol"
+		response := Response{201, responseJSON}
+
+		js, err := json.Marshal(response.Data)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		w.WriteHeader(response.StatusCode)
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
 	}
