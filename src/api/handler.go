@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/randykinne/configservice/data"
 	"github.com/randykinne/configservice/domain"
+	"github.com/randykinne/configservice/store"
 
 	"github.com/gorilla/mux"
 )
@@ -20,7 +20,7 @@ type Response struct {
 func CatchAllHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusNotFound)
-	w.Write([]byte(`{"message": "hello world"}`))
+	w.Write([]byte(`{"message": "not found"}`))
 }
 
 // ConfigHandler for configuration resources
@@ -28,8 +28,30 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	switch r.Method {
 	case "GET":
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"message": "hello world"}`))
+		data := make(map[string]interface{})
+		data["message"] = "success"
+		data["type"] = "configuration"
+
+		values, err := store.GetAll()
+
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		data["body"] = values
+
+		response := Response{http.StatusOK, data}
+
+		js, err := json.Marshal(response)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(response.StatusCode)
+		w.Write(js)
+
 	case "POST":
 		var c *domain.Config
 		err := json.NewDecoder(r.Body).Decode(&c)
@@ -39,12 +61,12 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		data.Put(c)
+		store.Put(c)
 
-		responseJSON := make(map[string]interface{})
-		responseJSON["message"] = "created"
-		responseJSON["location"] = "lol"
-		response := Response{201, responseJSON}
+		data := make(map[string]interface{})
+		data["message"] = "created"
+		data["location"] = "lol"
+		response := Response{http.StatusCreated, data}
 
 		js, err := json.Marshal(response.Data)
 		if err != nil {
@@ -53,7 +75,6 @@ func ConfigHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		w.WriteHeader(response.StatusCode)
-		w.Header().Set("Content-Type", "application/json")
 		w.Write(js)
 	}
 }
@@ -64,7 +85,7 @@ func SpecificConfigHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		response, err := data.Get(vars["id"])
+		response, err := store.Get(vars["id"])
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return

@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/randykinne/configservice/api"
-	"github.com/randykinne/configservice/data"
 
 	"net/http"
 	"os"
@@ -30,13 +29,13 @@ func main() {
 	r.Use(std.HandlerProvider("", mdlw))
 
 	log.Info("HTTP Server Ready")
-	data.Initialize()
+	store.Initialize()
 	log.Info("Data Store Initialized")
 
 	configHandler := r.PathPrefix("/api/configurations").Subrouter()
 	configHandler.HandleFunc("", api.ConfigHandler)
 	configHandler.HandleFunc("/{id:[0-9]+}", api.SpecificConfigHandler)
-	//r.PathPrefix("/").HandlerFunc(api.CatchAllHandler)
+	r.PathPrefix("/").HandlerFunc(api.CatchAllHandler)
 
 	r.Handle("/metrics", promhttp.Handler())
 

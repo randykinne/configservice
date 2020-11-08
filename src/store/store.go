@@ -1,4 +1,4 @@
-package data
+package store
 
 import (
 	"fmt"
@@ -11,6 +11,11 @@ var dataStore map[string]*domain.Config
 // Initialize data store
 func Initialize() {
 	dataStore = make(map[string]*domain.Config)
+}
+
+// GetAll configs from map
+func GetAll() (map[string]*domain.Config, error) {
+	return dataStore, nil
 }
 
 // Get a config from the map
